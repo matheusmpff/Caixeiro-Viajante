@@ -11,8 +11,8 @@
 	bool listaVazia(LISTA *lista);
 	int listaTamanho(LISTA *lista);
 	bool listaInserir(LISTA *lista, ITEM *item, int posicao);
-	bool listaRemover(LISTA *lista, int posicao);
-	ITEM *listaBuscar(LISTA *lista, int posicao);
+	ITEM *listaRemover(LISTA *lista, int posicao);
+	ITEM *listaPosicao(LISTA *lista, int posicao);
 	void listaImprimir(LISTA *lista);
 
 #endif
