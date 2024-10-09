@@ -2,6 +2,7 @@
 	#define LISTA_H
 	
 	#include <stdbool.h>
+	#include "item.h"
     #define TAM_MAX 1000
 
 	typedef struct lista_ LISTA;

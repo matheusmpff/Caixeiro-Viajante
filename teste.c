@@ -2,173 +2,262 @@
 #include <stdlib.h>
 #include "lista.h"
 #include "item.h"
-																								// incluir lista
 
-int fatorial(n){
-    int fatorial=1;
-    for(int i=1;i<=n;i++){
-        fatorial*=i;
+
+int achar_maior_movel(int *sequencia, int *direcao, int n);
+void troca_posicao(int posicao_maior, int *sequencia, int *direcao, int n);
+int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequencia);
+int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia);
+
+int fatorial(int n)
+{
+    int fatorial = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        fatorial *= i;
     }
 
     return fatorial;
 }
 
-void permutacao(int seqfinal, )
-
-void melhor_caminho(LISTA* distancias, int n, int seqfinal[]){
-
-    int direcao[n];
-    int distancia_final=0;
-    for(int i=0;i<n;i++){
-        direcao[i] =-1;
+int achar_maior_movel(int *sequencia, int *direcao, int n)
+{
+    int posicao_maior = -1;
+    int maior = -1;
+    if (direcao[0] != -1 && sequencia[0] > sequencia[1])
+    {
+        posicao_maior = 0;
+        maior = sequencia[0];
     }
-    //-1 representar esquerda 1 representar direita
-    int sequencia[n];
-
-    for(int i=0;i<n;i++){
-        sequencia[i]=i+1;
-        seqfinal[i] = i+1;
+    if (direcao[n - 2] != 1 && sequencia[n - 2] > sequencia[n - 3])
+    {
+        if (maior < sequencia[n - 2])
+        {
+            posicao_maior = n - 2;
+            maior = sequencia[n - 2];
+        }
     }
 
-    for(int i=0;i<n-1;i++){
-        int l = sequencia[i]-1;
-        int c = sequencia[i+1]-1;
+    for (int i = 1; i < n - 2; i++)
+    {
+        if ((direcao[i] == -1 && sequencia[i] > sequencia[i - 1]) || (direcao[i] == 1 && sequencia[i] > sequencia[i + 1]))
+        {
 
-        ITEM * it_aux = listaPosicao(distancias,l);
-        
-        LISTA * linha = itemDadoGet(it_aux);
+            if (maior < sequencia[i])
+            {
+                posicao_maior = i;
+                maior = sequencia[i];
+            }
+        }
+    }
 
-        it_aux = listaPosicao(linha,c);
+    return posicao_maior;
+}
 
+void troca_posicao(int posicao_maior, int *sequencia, int *direcao, int n)
+{
+
+    int maior = sequencia[posicao_maior];
+    int direcao_maior = direcao[posicao_maior];
+    if (direcao[posicao_maior] == -1)
+    {
+        sequencia[posicao_maior] = sequencia[posicao_maior - 1];
+        sequencia[posicao_maior - 1] = maior;
+        direcao[posicao_maior] = direcao[posicao_maior - 1];
+        direcao[posicao_maior - 1] = direcao_maior;
+    }
+    else
+    {
+        sequencia[posicao_maior] = sequencia[posicao_maior + 1];
+        sequencia[posicao_maior + 1] = maior;
+        direcao[posicao_maior] = direcao[posicao_maior + 1];
+        direcao[posicao_maior + 1] = direcao_maior;
+    }
+    for (int i = 0; i < n - 1; i++)
+    {
+        if (sequencia[i] > maior)
+        {
+            direcao[i] *= -1;
+        }
+    }
+}
+
+int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia)
+{
+    int distancia;
+    int distancia_aux;
+    distancia = calcular_caminho(distancias, n, cidade_inicial, sequencia);
+
+    // sentido para esquerda é -1 e sentido para direita é 1.
+    int direcao[n - 1];
+    for (int i = 0; i < n - 1; i++){
+        direcao[i] = -1;
+    }
+
+    int quantidade_sequencias = fatorial(n - 1);
+
+    int posicao_maior_movel;
+    for (int i = 1; i < quantidade_sequencias / 2; i++)
+    {
+        posicao_maior_movel = achar_maior_movel(sequencia, direcao, n);
+        troca_posicao(posicao_maior_movel, sequencia, direcao, n);
+
+        distancia_aux = calcular_caminho(distancias, n, cidade_inicial, sequencia);
+
+        if (distancia > distancia_aux)
+        {
+
+            distancia = distancia_aux;
+            for (int i = 0; i < n - 1; i++)
+            {
+                seqfinal[i] = sequencia[i];
+            }
+        }
+    }
+    return distancia;
+}
+
+int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequencia)
+{
+    int distancia_final = 0;
+    for (int i = 0; i < n - 2; i++)
+    {
+        int l = sequencia[i] - 1;
+        int c = sequencia[i + 1] - 1;
+
+        ITEM *it_aux = listaPosicao(distancias, l);
+
+        LISTA *linha = itemDadoGet(it_aux);
+
+        if (listaPosicao(linha, c) == NULL)
+        {
+            return -1;
+        }
+
+        it_aux = listaPosicao(linha, c);
 
         distancia_final += itemChaveGet(it_aux);
-
-
     }
 
-    int l = sequencia[n-1]-1;
-    int c = sequencia[0]-1;
+    int l = sequencia[n - 2] - 1;
+    int c = cidade_inicial - 1;
 
-    ITEM * it_aux = listaPosicao(distancias,l);
-        
-    LISTA * linha = itemDadoGet(it_aux);
+    ITEM *it_aux = listaPosicao(distancias, l);
 
-    it_aux = listaPosicao(linha,c);
+    LISTA *linha = itemDadoGet(it_aux);
+
+    it_aux = listaPosicao(linha, c);
 
     distancia_final += itemChaveGet(it_aux);
 
+    l = sequencia[0] - 1;
+    c = cidade_inicial - 1;
 
-    permutacao();
-    
+    it_aux = listaPosicao(distancias, l);
 
+    linha = itemDadoGet(it_aux);
 
+    it_aux = listaPosicao(linha, c);
 
+    distancia_final += itemChaveGet(it_aux);
 
-
-
+    return distancia_final;
 }
 
+int main()
+{
 
+    int n, i, j, k, djk, dfinal;
+    dfinal = 0;
 
-
-int main(){
-	
-    int n, i, i2, i3, j, k, djk, dtemp, dfinal, seqfinal[n], numtrajetos;	
-
-    dtemp = 0;
-    dfinal = 0;	
-
-    printf("Numero de cidades: ");
+    //numero de cidades
     scanf("%d", &n);
 
+    int seqfinal[n - 1];
 
-    numtrajetos = fatorial(n);
+    // cidade inicial
+    int cidade_inicial;
+    scanf("%d", &cidade_inicial);
 
-    //int dist[n][n];
+    // quantidade de estrada:
+    int quantidade_estrada;
+    scanf("%d", &quantidade_estrada);
 
     LISTA *dist = listaCriar();
 
-    for(int i = 0;i<n;i++){
-        LISTA * aux = listaCriar();
+    for (int i = 0; i < n; i++)
+    {
+        LISTA *aux = listaCriar();
 
-        ITEM * aux_item = item_criar(i,aux);
+        ITEM *aux_item = itemCriar(i, aux);
 
-        listaInserir(dist,aux_item,i);
-
+        listaInserir(dist, aux_item, i);
     }
-
-    
-
-
-    //LISTA *ordem = lista_criar();
-
-   // for (i = 0; i < n; i++)
-   // lista_inserir(ordem, n);
-
-  //  for (i = 0; i < (n(n-1))/2; i++){					// definindo as distancias
-        
-   // scanf("%d %d %d", &j, &k, &djk);	
-   // dist[j-1][k-1] = djk;
-   // dist[k-1][j-1] = djk;	
-   // }
-
-   
-
-   for(i = 0; i < (n*(n-1))/2; i++){
+    // Criando a matriz com as distâncias inseridas pelo usuário
+    for (i = 0; i < quantidade_estrada; i++)
+    {
         scanf("%d %d %d", &j, &k, &djk);
 
-        ITEM * it_aux = listaBuscar(dist,j-1);
-        LISTA * lista_aux = item_get_dados(it_aux);
-        ITEM *distancia= item_criar(djk,NULL);
+        ITEM *it_aux = listaPosicao(dist, j - 1);
+        LISTA *lista_aux = itemDadoGet(it_aux);
+        ITEM *distancia = itemCriar(djk, NULL);
 
-        listaInserir(lista_aux, distancia,k-1);
+        listaInserir(lista_aux, distancia, k - 1);
 
-        ITEM * it_aux = listaBuscar(dist,k-1);
-        LISTA * lista_aux = item_get_dados(it_aux);
-        ITEM *distancia= item_criar(djk,NULL);
+        it_aux = listaPosicao(dist, k - 1);
+        lista_aux = itemDadoGet(it_aux);
 
-        listaInserir(lista_aux, distancia,j-1); 
+        listaInserir(lista_aux, distancia, j - 1);
     }
 
-        
-    /*for (i = 0; i < numtrajetos; i++){					// testando os trajetos e escolhendo o menor
-                                                                                                    
-    lista_ordenar(lista);																								
-            
-    for(i2 = 0; i2 < n-1; i2)
-    dtemp = dtemp + dist[ordem[i2]][ordem[i2 + 1]];	
-        
-    dtemp = dtemp + dist[ordem[i2 - 1]][ordem[0]];	
-                                                                                                    
-    if(dtemp >= dfinal){
-        
-    dfinal = dtemp;	
+    // Coloca a primeira rota no vetor sequencia
+    int sequencia[n - 1];
+    int contador = 0;
+    for (int i = 0; i < n; i++)
+    {
 
-    for (i3 = 0; i3 < n; i3++)
-    seqfinal[i3] = ordem[i3]; 	
-        
+        if (i == cidade_inicial - 1)
+        {
+            if (i == n - 1)
+            {
+                break;
+            }
+            sequencia[i] = i + 2;
+            seqfinal[i] = i + 2;
+            i++;
+            contador++;
+            continue;
+        }
+        if (contador == 1)
+        {
+            sequencia[i - 1] = i + 1;
+            seqfinal[i - 1] = i + 1;
+            continue;
+        }
+        sequencia[i] = i + 1;
+        seqfinal[i] = i + 1;
     }
 
-    dtemp = 0;																									
-        
-        
-    }*/
+    for (int i = 0; i < n - 1; i++)
+    {
+        printf("%d\n", sequencia[i]);
+    }
 
-    melhor_caminho(dist,n, seqfinal);
-
-    printf("Cidade de Origem: %d\n", seqfinal[0]);
+    // chamada da função que retorna o melhor caminho
+    dfinal = permutacao(dist, seqfinal, cidade_inicial, n, sequencia);
+    printf("sai do permutacao");
+    // Formatação para sair corretamente o resultado
+    printf("Cidade de Origem: %d\n", cidade_inicial);
 
     printf("Rota: ");
 
-    for (i = 0; i < n; i++)
-    printf("%d-", seqfinal[i]);
+    printf("%d-", cidade_inicial);
+    for (i = 0; i < n - 1; i++)
+        printf("%d-", seqfinal[i]);
 
-    printf("%d\n", seqfinal[0]);
+    printf("%d\n", cidade_inicial);
 
     printf("Distancia: %d", dfinal);
 
-
-return 0;	
-	
+    return 0;
 }
-
