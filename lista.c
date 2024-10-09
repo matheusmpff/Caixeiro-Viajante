@@ -22,7 +22,7 @@ LISTA *listaCriar(void){
 }
 
 void listaApagar(LISTA **lista){
-    if(*lista != NULL);
+    if(*lista != NULL){
         free(*lista);
         *lista = NULL;
     }
