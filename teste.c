@@ -13,7 +13,56 @@ int fatorial(n){
     return fatorial;
 }
 
+void permutacao(int seqfinal, )
+
 void melhor_caminho(LISTA* distancias, int n, int seqfinal[]){
+
+    int direcao[n];
+    int distancia_final=0;
+    for(int i=0;i<n;i++){
+        direcao[i] =-1;
+    }
+    //-1 representar esquerda 1 representar direita
+    int sequencia[n];
+
+    for(int i=0;i<n;i++){
+        sequencia[i]=i+1;
+        seqfinal[i] = i+1;
+    }
+
+    for(int i=0;i<n-1;i++){
+        int l = sequencia[i]-1;
+        int c = sequencia[i+1]-1;
+
+        ITEM * it_aux = listaPosicao(distancias,l);
+        
+        LISTA * linha = itemDadoGet(it_aux);
+
+        it_aux = listaPosicao(linha,c);
+
+
+        distancia_final += itemChaveGet(it_aux);
+
+
+    }
+
+    int l = sequencia[n-1]-1;
+    int c = sequencia[0]-1;
+
+    ITEM * it_aux = listaPosicao(distancias,l);
+        
+    LISTA * linha = itemDadoGet(it_aux);
+
+    it_aux = listaPosicao(linha,c);
+
+    distancia_final += itemChaveGet(it_aux);
+
+
+    permutacao();
+    
+
+
+
 
 
 
@@ -32,6 +81,7 @@ int main(){
     printf("Numero de cidades: ");
     scanf("%d", &n);
 
+
     numtrajetos = fatorial(n);
 
     //int dist[n][n];
@@ -47,9 +97,7 @@ int main(){
 
     }
 
-    for(int i=0;i<n;i++){
-        seqfinal[i]=i+1;
-    }
+    
 
 
     //LISTA *ordem = lista_criar();
