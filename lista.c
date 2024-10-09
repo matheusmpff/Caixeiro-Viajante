@@ -3,7 +3,7 @@
 #include "item.h"
 #include "lista.h"
 
-struct lista_h{
+struct lista_{
 	ITEM *posicao[TAM_MAX];
 	int inicio;
 	int fim;
@@ -12,7 +12,7 @@ struct lista_h{
 
 LISTA *listaCriar(void){
 	LISTA *lista;
-	lista = (LISTA *) calloc(sizeof(LISTA));
+	lista = (LISTA *) calloc(1, sizeof(LISTA));
     if(lista != NULL){
         lista->inicio = 0;
         lista->fim = 0;
@@ -74,7 +74,7 @@ ITEM *listaPosicao(LISTA *lista, int posicao){
 void listaImprimir(LISTA *lista){
     if(lista != NULL){
         for(int i = 0; i <= lista->fim; i++){
-            printf("Posição 1: chave -> %d\n", lista->posicao[i]->chave);
+            printf("Posição 1: chave -> %d\n", itemChaveGet(lista->posicao[i]));
         }
     }
     return;

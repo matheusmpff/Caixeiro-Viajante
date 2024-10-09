@@ -5,10 +5,10 @@
 
 	typedef struct item_ ITEM;
 
-	ITEM *item_criar (int chave, void *comp);
-	bool item_apagar (ITEM **item);
-	int item_get_chave (ITEM *item);
-	bool item_set_chave (ITEM *item, int chave);
-	void *item_get_dados (ITEM *item);
+	ITEM *itemCriar(int chave, void *comp);
+	void itemApagar(ITEM **item);
+	int itemChaveGet(ITEM *item);
+	bool itemChaveSet(ITEM *item, int chave);
+	void *itemDadoGet(ITEM *item);
 
 #endif

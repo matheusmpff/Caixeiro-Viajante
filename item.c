@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "item.h"
 
-struct item_h{
+struct item_{
 	int chave;
 	void *dado;
 };
@@ -17,7 +17,7 @@ ITEM *itemCriar(int chave, void *ptr){
 }
 
 void itemApagar(ITEM **item){
-	if((*item) != null){
+	if((*item) != NULL){
 		(*item)->dado = NULL;
 		free(*item);
 	}
