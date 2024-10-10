@@ -1,13 +1,20 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "lista.h"
 #include "item.h"
 
+//acha qual posicao vai se mover no proximo passo da permutacao
+int maiorMovelEncontrar(int *sequencia, int *direcao, int n);
 
-int achar_maior_movel(int *sequencia, int *direcao, int n);
-void troca_posicao(int posicao_maior, int *sequencia, int *direcao, int n);
-int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequencia);
-int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia);
+//troca a posicao que ira se mover, na direcao que ela aponta
+void posicaoMover(int posicao_maior, int *sequencia, int *direcao, int n);
+
+//funcao para calcular a distancia equivalente a aquela permutacao (sequencia de cidades), adicionando a cidade inicial no fim e inicio
+int caminhoCalcular(LISTA *distancias, int n, int cidade_inicial, int *sequencia);
+
+//funcao que passa por todas as permutacoes do array de cidades, cada array indica um caminho.
+//comeca com o array (2, 3, 4, 5, 6), no caso de seis cidades, com a cidade 1 sendo a inicial
+//esse algoritmo se chama johnson-trotter
+int cidadesPermutar(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia);
 
 int fatorial(int n)
 {
@@ -20,10 +27,12 @@ int fatorial(int n)
     return fatorial;
 }
 
-int achar_maior_movel(int *sequencia, int *direcao, int n)
+int maiorMovelEncontrar(int *sequencia, int *direcao, int n)
 {
     int posicao_maior = -1;
     int maior = -1;
+    //primeiro testamos os dois casos especiais, o primeiro elemento e o ultimo
+    //eles nao podem se mover para a esquerda e direita, respectivamente.
     if (direcao[0] != -1 && sequencia[0] > sequencia[1])
     {
         posicao_maior = 0;
@@ -37,7 +46,7 @@ int achar_maior_movel(int *sequencia, int *direcao, int n)
             maior = sequencia[n - 2];
         }
     }
-
+    //agora, passamos por todos os elementos, vendo se eles podem se movimentar, e pegamos o maior numero que conseguir
     for (int i = 1; i < n - 2; i++)
     {
         if ((direcao[i] == -1 && sequencia[i] > sequencia[i - 1]) || (direcao[i] == 1 && sequencia[i] > sequencia[i + 1]))
@@ -54,26 +63,26 @@ int achar_maior_movel(int *sequencia, int *direcao, int n)
     return posicao_maior;
 }
 
-void troca_posicao(int posicao_maior, int *sequencia, int *direcao, int n)
+void posicaoMover(int posicao_maior, int *sequencia, int *direcao, int n)
 {
 
     int maior = sequencia[posicao_maior];
     int direcao_maior = direcao[posicao_maior];
-    if (direcao[posicao_maior] == -1)
+    if (direcao[posicao_maior] == -1) //se a direcao for para a esquerda
     {
         sequencia[posicao_maior] = sequencia[posicao_maior - 1];
         sequencia[posicao_maior - 1] = maior;
         direcao[posicao_maior] = direcao[posicao_maior - 1];
         direcao[posicao_maior - 1] = direcao_maior;
     }
-    else
+    else //para a direita
     {
         sequencia[posicao_maior] = sequencia[posicao_maior + 1];
         sequencia[posicao_maior + 1] = maior;
         direcao[posicao_maior] = direcao[posicao_maior + 1];
         direcao[posicao_maior + 1] = direcao_maior;
     }
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 0; i < n - 1; i++) //todos os numeros maiores do que o numero que acabou de ser movido tem sua direcao revertida
     {
         if (sequencia[i] > maior)
         {
@@ -82,11 +91,12 @@ void troca_posicao(int posicao_maior, int *sequencia, int *direcao, int n)
     }
 }
 
-int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia)
+int cidadesPermutar(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int *sequencia)
 {
     int distancia;
-    int distancia_aux;
-    distancia = calcular_caminho(distancias, n, cidade_inicial, sequencia);
+    int distancia_aux; //esta variavel guarda temporariamente a distancia retornada por distanciaCalcular
+    //a variavel distancia guardara a menor distancia, que sera retornada por esta funcao
+    distancia = caminhoCalcular(distancias, n, cidade_inicial, sequencia);
 
     // sentido para esquerda é -1 e sentido para direita é 1.
     int direcao[n - 1];
@@ -94,17 +104,17 @@ int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int 
         direcao[i] = -1;
     }
 
-    int quantidade_sequencias = fatorial(n - 1);
+    int quantidade_sequencias = fatorial(n - 1); //a quantidade de permutacoes eh n fatorial, mas excluimos a cidade inicial
 
     int posicao_maior_movel;
     for (int i = 1; i < quantidade_sequencias; i++)
     {
-        posicao_maior_movel = achar_maior_movel(sequencia, direcao, n);
-        troca_posicao(posicao_maior_movel, sequencia, direcao, n);
+        posicao_maior_movel = maiorMovelEncontrar(sequencia, direcao, n);
+        posicaoMover(posicao_maior_movel, sequencia, direcao, n);
 
-        distancia_aux = calcular_caminho(distancias, n, cidade_inicial, sequencia);
+        distancia_aux = caminhoCalcular(distancias, n, cidade_inicial, sequencia);
 
-        if(distancia_aux == -1){
+        if(distancia_aux == -1){ //o numero -1 eh retornado caso esse caminho nao exista
             continue;
         }
 
@@ -113,26 +123,27 @@ int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int 
             distancia = distancia_aux;
             for (int i = 0; i < n - 1; i++)
             {
-                seqfinal[i] = sequencia[i];
+                seqfinal[i] = sequencia[i]; //guardamos a sequencia que tem o menor caminho ja encontrado
             }
         }
     }
     return distancia;
 }
 
-int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequencia)
+int caminhoCalcular(LISTA *distancias, int n, int cidade_inicial, int *sequencia)
 {
     int distancia_final = 0;
     for (int i = 0; i < n - 2; i++)
     {
         int l = sequencia[i] - 1;
         int c = sequencia[i + 1] - 1;
-
+        //temos a cidade de origem e a de destino, l e c. agora, achamos a chave do item na posicao c da lista que esta no item na
+        //posicao l da lista distancias
         ITEM *it_aux = listaPosicao(distancias, l);
 
         LISTA *linha = itemDadoGet(it_aux);
 
-        if (listaPosicao(linha, c) == NULL)
+        if (listaPosicao(linha, c) == NULL) //se o item for nulo, ele n foi criado, ou seja, aquele caminho nao existe
         {
             return -1;
         }
@@ -141,6 +152,7 @@ int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequenci
 
         distancia_final += itemChaveGet(it_aux);
     }
+    //agora, adicionamos a cidade inicial no comeco e no final do caminho
 
     int l = sequencia[n - 2] - 1;
     int c = cidade_inicial - 1;
@@ -195,7 +207,9 @@ int main()
     // quantidade de estrada:
     int quantidade_estrada;
     scanf("%d", &quantidade_estrada);
-
+    //lista dist contera listas que contem as distancias entre as cidades
+    //as listas nas posicoes i sao as distancias que partem da cidade i.
+    //a chave do item na posicao j na lista dentro da lista contem a distancia da cidade i para a cidade j.
     LISTA *dist = listaCriar();
 
     for (int i = 0; i < n; i++)
@@ -206,7 +220,7 @@ int main()
 
         listaInserir(dist, aux_item, i);
     }
-    // Criando a matriz com as distâncias inseridas pelo usuário
+    // Criando a lista de lista com as distâncias inseridas pelo usuário
     for (i = 0; i < quantidade_estrada; i++)
     {
         scanf("%d %d %d", &j, &k, &djk);
@@ -251,16 +265,9 @@ int main()
         seqfinal[i] = i + 1;
     }
 
-    
-
-    int direcao[n-1];
-
-    for(int i=0;i<n-1;i++){
-        direcao[i]=-1;
-    }
    
     // chamada da função que retorna o melhor caminho
-    dfinal = permutacao(dist, seqfinal, cidade_inicial, n, sequencia);
+    dfinal = cidadesPermutar(dist, seqfinal, cidade_inicial, n, sequencia);
     // Formatação para sair corretamente o resultado
     printf("Cidade de Origem: %d\n", cidade_inicial);
 
@@ -272,7 +279,7 @@ int main()
 
     printf("%d\n", cidade_inicial);
 
-    printf("Distancia: %d", dfinal);
+    printf("Distancia: %d\n", dfinal);
 
     return 0;
 }
