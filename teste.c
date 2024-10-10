@@ -97,16 +97,19 @@ int permutacao(LISTA *distancias, int *seqfinal, int cidade_inicial, int n, int 
     int quantidade_sequencias = fatorial(n - 1);
 
     int posicao_maior_movel;
-    for (int i = 1; i < quantidade_sequencias / 2; i++)
+    for (int i = 1; i < quantidade_sequencias; i++)
     {
         posicao_maior_movel = achar_maior_movel(sequencia, direcao, n);
         troca_posicao(posicao_maior_movel, sequencia, direcao, n);
 
         distancia_aux = calcular_caminho(distancias, n, cidade_inicial, sequencia);
 
+        if(distancia_aux == -1){
+            continue;
+        }
+
         if (distancia > distancia_aux)
         {
-
             distancia = distancia_aux;
             for (int i = 0; i < n - 1; i++)
             {
@@ -146,6 +149,11 @@ int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequenci
 
     LISTA *linha = itemDadoGet(it_aux);
 
+    if (listaPosicao(linha, c) == NULL)
+        {
+            return -1;
+        }
+
     it_aux = listaPosicao(linha, c);
 
     distancia_final += itemChaveGet(it_aux);
@@ -156,6 +164,11 @@ int calcular_caminho(LISTA *distancias, int n, int cidade_inicial, int *sequenci
     it_aux = listaPosicao(distancias, l);
 
     linha = itemDadoGet(it_aux);
+
+    if (listaPosicao(linha, c) == NULL)
+        {
+            return -1;
+        }
 
     it_aux = listaPosicao(linha, c);
 
@@ -238,14 +251,16 @@ int main()
         seqfinal[i] = i + 1;
     }
 
-    for (int i = 0; i < n - 1; i++)
-    {
-        printf("%d\n", sequencia[i]);
-    }
+    
 
+    int direcao[n-1];
+
+    for(int i=0;i<n-1;i++){
+        direcao[i]=-1;
+    }
+   
     // chamada da função que retorna o melhor caminho
     dfinal = permutacao(dist, seqfinal, cidade_inicial, n, sequencia);
-    printf("sai do permutacao");
     // Formatação para sair corretamente o resultado
     printf("Cidade de Origem: %d\n", cidade_inicial);
 
